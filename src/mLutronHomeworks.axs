@@ -123,7 +123,7 @@ rebuild_event()
 DEFINE_EVENT
 data_event[dvPort] {
     online: {
-    if (iModuleEnabled && data.device.number <> 0) {
+    if (iModuleEnabled && data.device.number != 0) {
         send_command data.device,"'SET BAUD 9600,N,8,1 485 DISABLE'"
         send_command data.device,"'B9MOFF'"
         send_command data.device,"'CHARD-0'"
@@ -142,11 +142,11 @@ data_event[dvPort] {
         //}
 
         //wait 10 Init()
-        //timeline_create(TL_DRIVE,ltDrive,length_array(ltDrive),timeline_absolute,timeline_repeat)
+        //NAVTimelineStart(TL_DRIVE,ltDrive,timeline_absolute,timeline_repeat)
     }
 
     if (iModuleEnabled && data.device.number == 0) {
-        //NAVLog('EXTRON_DVS_ONLINE')
+        //NAVErrorLog(NAV_LOG_LEVEL_DEBUG, 'EXTRON_DVS_ONLINE')
         iIPConnected = true; //iIPAuthenticated = true;
     }
     }
@@ -156,7 +156,7 @@ data_event[dvPort] {
         iCommunicating = true
         [vdvObject,DATA_INITIALIZED] = true
         TimeOut()
-         NAVLog(NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_FROM, dvPort, data.text))
+         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_FROM, dvPort, data.text))
         if (!iSemaphore) { Process() }
         */
         send_string 0, "data.text"
@@ -172,7 +172,7 @@ data_event[dvPort] {
     }
     offline: {
     if (data.device.number == 0) {
-        //NAVLog('EXTRON_DVS_OFFLINE')
+        //NAVErrorLog(NAV_LOG_LEVEL_DEBUG, 'EXTRON_DVS_OFFLINE')
         NAVClientSocketClose(dvPort.port)
         iIPConnected = false
         //iIPAuthenticated = false
@@ -184,7 +184,7 @@ data_event[dvPort] {
     }
     onerror: {
     if (data.device.number == 0) {
-        //NAVLog('EXTRON_DVS_ONERROR')
+        //NAVErrorLog(NAV_LOG_LEVEL_DEBUG, 'EXTRON_DVS_ONERROR')
         iIPConnected = false
         //iIPAuthenticated = false
         //iCommunicating = false
@@ -200,7 +200,7 @@ data_event[vdvObject] {
     stack_var char cCmdHeader[NAV_MAX_CHARS]
     stack_var char cCmdParam[3][NAV_MAX_CHARS]
     if (iModuleEnabled) {
-        NAVLog(NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_FROM, data.device, data.text))
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_FROM, data.device, data.text))
         cCmdHeader = DuetParseCmdHeader(data.text)
         cCmdParam[1] = DuetParseCmdParam(data.text)
         cCmdParam[2] = DuetParseCmdParam(data.text)
@@ -210,7 +210,7 @@ data_event[vdvObject] {
             switch (cCmdParam[1]) {
             case 'IP_ADDRESS': {
                 cIPAddress = cCmdParam[2]
-                timeline_create(TL_IP_CHECK,ltIPCheck,length_array(ltIPCheck),timeline_absolute,timeline_repeat)
+                NAVTimelineStart(TL_IP_CHECK,ltIPCheck,timeline_absolute,timeline_repeat)
             }
             //case 'LINK': {
                 //cID = format('%02d',atoi(cCmdParam[2]))
